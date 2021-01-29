@@ -1,4 +1,4 @@
-#include <stdio.h> // std i/o
+#include <stdio.h> // std i/o, perror
 #include <stdlib.h> //exit(), malloc(), free()
 #include <unistd.h> // fork()
 #include <semaphore.h> // sem_unlink(), sem_open(), sem_wait(), sem_post(), etc
