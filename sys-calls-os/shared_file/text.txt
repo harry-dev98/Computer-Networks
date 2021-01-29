@@ -1,0 +1,1 @@
+hello there, I have text to read, can you share reading it with your child process or someother process, such that a small chunk is read by you then its read by other process may be related or not. Let me know at fd=1 if you are able to do so. 
