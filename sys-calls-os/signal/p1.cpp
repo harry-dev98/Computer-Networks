@@ -22,15 +22,17 @@ void handler(int signum){
     int shmXId = shmget(ftok1, sizeof(int), 0666|IPC_CREAT);
     int *x = (int *) shmat(shmXId,NULL, 0);
     cout<<"Some process with pid: "<<pid_other<<" asked me to process: "<<*x<<".\n";
-    shmdt (x);
-    shmctl (shmXId, IPC_RMID, 0);
 
     key_t ftok2 = ftok(shmY.c_str(), 18);
     int shmYId = shmget(ftok2, sizeof(int), 0666|IPC_CREAT);
     int *y = (int *) shmat(shmYId, NULL, 0);
-    *y = 121;
-    cout<<"Writing the processed info to new shared memory y and leting the process know it.\n";
+    *y = (*x) * (*x);
+    shmdt (x);
+    shmdt (y);
+    shmctl (shmXId, IPC_RMID, 0);
+    shmctl (shmYId, IPC_RMID, 0);
     kill(pid_other, SIGINT);
+    cout<<"Writing the processed info to new shared memory y and leting the process know it.\n";
 }
 
 void* write(void *args){
