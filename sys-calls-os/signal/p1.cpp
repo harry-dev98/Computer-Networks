@@ -18,6 +18,7 @@ string shmY = "/tmp/shmY";
 
 int pid_other;
 void handler(int signum){
+    // gen key for shm, allocates mem, attach mem, twice x and y
     key_t ftok1 = ftok(shmX.c_str(), 18);
     int shmXId = shmget(ftok1, sizeof(int), 0666|IPC_CREAT);
     int *x = (int *) shmat(shmXId,NULL, 0);
@@ -27,14 +28,21 @@ void handler(int signum){
     int shmYId = shmget(ftok2, sizeof(int), 0666|IPC_CREAT);
     int *y = (int *) shmat(shmYId, NULL, 0);
     *y = (*x) * (*x);
+    
+    // detaching memory x, y
     shmdt (x);
     shmdt (y);
+
+    // running command to destory shm when no process using it
     shmctl (shmXId, IPC_RMID, 0);
     shmctl (shmYId, IPC_RMID, 0);
+
+    // signaling other process
     kill(pid_other, SIGINT);
     cout<<"Writing the processed info to new shared memory y and leting the process know it.\n";
 }
 
+// thread will write to fifo
 void* write(void *args){
     int wFd = open(fifoP1.c_str(), O_WRONLY);
     int pid = getpid();
@@ -44,6 +52,8 @@ void* write(void *args){
     pthread_exit(0);
 }
 
+
+// thread will read from fifo
 void* read(void *args){
     int rFd = open(fifoP2.c_str(), O_RDONLY);
     //reading p2's pid;
@@ -64,15 +74,21 @@ int main(){
     mkfifo(fifoP1.c_str(), 0666);
     mkfifo(fifoP2.c_str(), 0666);
     pthread_t th1, th2;
+
+    // two threads read/write parallelly
     pthread_create(&th1, NULL, &write, (void*) NULL);
     pthread_create(&th2, NULL, &read, (void*) NULL);
     void* s1, *s2;
+    
+    // main thread waits for both to perform inital
+    // work i.e r/w on fifoP1/fifoP2
     pthread_join(th1, &s1);
     pthread_join(th2, &s2);
+
     cout<<"waiting for action\n";
     while(endVar){
         //ends only when other process talks to it once
     }
-    cout<<"now exiting as other process asked me.\n";
+
     return 0;
 }
