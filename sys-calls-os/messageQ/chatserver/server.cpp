@@ -10,7 +10,6 @@
 #include <fcntl.h>
 #include <map>
 
-#define MAINCHANNEL "/tmp/mainfifo-1"
 #define BUFF 10
 #define MSG 10
 
@@ -20,7 +19,7 @@ struct msg {
 };
 
 std::set<int> cData;
-int msgqid1, msgqid2;
+int msgqid1, msgqid2, msgqid3;
 
 void* handleClient(void *args){
     msg* buff = (msg *)args;
@@ -28,10 +27,14 @@ void* handleClient(void *args){
     cData.insert(buff->type);
     do {
         msg m;
+        std::cout<<"waiting\n";
         msgrcv(msgqid1, &m, sizeof(m), buff->type, 0);
+        std::cout<<"recieved from: "<<buff->type<<"\n";
         for(auto cD: cData){
-            m.type = cD;
-            msgsnd(msgqid1, &m, sizeof(m), 0);
+            if(m.type != cD){
+                m.type = cD;
+                msgsnd(msgqid3, &m, sizeof(m), 0);
+            }
         }
     } while(1);
     printf("Exits\n");
@@ -42,10 +45,13 @@ void* handleClient(void *args){
 int main(){
     system("touch ./server-client1.txt");
     system("touch ./server-client2.txt");
+    system("touch ./server-client3.txt");
     key_t key1 = ftok("./server-client1.txt", 1);
     key_t key2 = ftok("./server-client2.txt", 1);
+    key_t key3 = ftok("./server-client3.txt", 1);
     msgqid1 = msgget(key1, IPC_CREAT|0666);
     msgqid2 = msgget(key2, IPC_CREAT|0666);
+    msgqid3 = msgget(key3, IPC_CREAT|0666);
 
     do {
         pthread_t thread;
