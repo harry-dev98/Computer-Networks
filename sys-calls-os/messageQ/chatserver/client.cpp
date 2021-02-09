@@ -15,7 +15,7 @@
 #define MSG 10
 
 struct msg {
-    int type;
+    long mtype;
     char msg[MSG];
 };
 
@@ -27,7 +27,9 @@ void* handleSendMsg(void* arg){
     while(1){
         printf("Please enter message of less than 10 char\n");
         scanf("%s", m.msg);
+        m.mtype = pid;
         msgsnd(msgqid1, &m, sizeof(m), 0);
+        perror("msgsnd");
     }
     printf("Exits\n");
     pthread_exit(0);
@@ -38,7 +40,8 @@ void* handleRecvMsg(void* arg){
     while(1){
         std::cout<<"waiting for some msg\n";
         msgrcv(msgqid3, &m, sizeof(m), pid, 0);
-        std::cout<<"msg recieved from: "<<m.type<<"\n";
+        perror("msgrcv");
+        std::cout<<"msg recieved from: "<<m.mtype<<"\n";
         std::cout<<"msg :"<<m.msg<<"\n";
     }
     printf("Exits\n");
@@ -59,7 +62,7 @@ int main(){
     // sending my pid
     pid = getpid();
     msg m;
-    m.type=pid;
+    m.mtype=pid;
     msgsnd(msgqid2, &m, sizeof(m), 0);
 
     pthread_t thread1, thread2;   
