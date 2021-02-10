@@ -12,7 +12,7 @@
 
 #define N 3
 #define MAINCHANNEL "/tmp/mainfifo-1"
-#define BUFF 10
+#define BUFF 8
 
 std::string readDir = "/tmp/r";
 std::string writeDir = "/tmp/w";
@@ -71,13 +71,15 @@ int main(){
         perror("open rDir");
         while(1){
             struct iovec iov[2];
-            char buff1[8], buff2[8];
+            char buff1[BUFF], buff2[BUFF];
             iov[0].iov_base = buff1;
             iov[1].iov_base = buff2;
             iov[0].iov_len = sizeof(buff1);
             iov[1].iov_len = sizeof(buff2);
             
-            readv(STDIN_FILENO, iov, 2);
+            // readv(STDIN_FILENO, iov, 2); // problem with it is it reads all characters
+                                            // even newline or space char
+            std::cin>>buff1>>buff2;
             writev(sendFD, iov, 2);
         }
         close(sendFD);
