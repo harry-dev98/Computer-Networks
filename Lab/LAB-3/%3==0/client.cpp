@@ -20,18 +20,27 @@ struct msg {
     char msg[MSG];
 };
 
-std::set<int> cData;
+set<int> cData;
 int msgqid, pid;
 string pid_str;
 
-int infoType, msgType, recvType, globalType = 4;
+int infoType, msgType, recvType, globalType = 5;
+
 void* handleSendMsg(void* arg){
     msg m;
     while(1){
         printf("Please enter message\n");
         string _msg;
         cin>>_msg;
-        m.mtype = msgType;
+        if(_msg == "exit")break;
+        cout<<"wish to send it globally?y/n\n";
+        char ch;
+        cin>>ch;
+        if(ch == 'y'){
+            m.mtype = globalType;
+        } else {
+            m.mtype = msgType;
+        }
         _msg = pid_str + ":" + _msg;
         _msg.copy(m.msg, _msg.size());
         m.msg[_msg.size()] = '\0';
@@ -45,10 +54,12 @@ void* handleSendMsg(void* arg){
 void* handleRecvMsg(void* arg){
     msg m;
     while(1){
-        std::cout<<"waiting for some msg\n";
-        msgrcv(msgqid, &m, sizeof(m), recvType, 0);
-        perror("msgrcv");
-        std::cout<<"msg :"<<m.msg<<"\n";
+        cout<<"waiting for some msg\n";
+        if(msgrcv(msgqid, &m, sizeof(m), recvType, 0)==-1){
+            cout<<"error with msgqid\n"; 
+            break;
+        }
+        cout<<"msg :"<<m.msg<<"\n";
     }
     printf("Exits\n");
     pthread_exit(0);
@@ -62,19 +73,21 @@ int main(){
     int n;
     cin>>n;
     if(n == 1){
-        infoType = 0;
-        msgType = 2;
-    } else if(n == 2) {
         infoType = 1;
         msgType = 3;
+    } else if(n == 2) {
+        infoType = 2;
+        msgType = 4;
     } else {
         return 0;
     }
     recvType = pid;
 
     system("touch ./server-client-lab3.txt");
-    key_t key = ftok("./server-client-lab3.txt", 1);
+    key_t key = ftok("./server-client-lab3.txt", 18);
+    perror("key");
     msgqid = msgget(key, IPC_CREAT|0666);
+    perror("msgget");
 
     msg m;
     m.mtype=infoType; 

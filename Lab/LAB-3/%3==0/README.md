@@ -3,11 +3,11 @@
 
 
 Declared message types in queue:\
-`type == 0 :: group 1 registers them with server`\
-`type == 1 :: group 2 registers them with server`\
-`type == 2 :: group 1 broadcasts the message to server`\
-`type == 3 :: group 2 broadcasts the message to server`\
-`type == 4 :: any client broadcasts the global message to server`\
+`type == 1 :: group 1 registers them with server`\
+`type == 2 :: group 2 registers them with server`\
+`type == 3 :: group 1 broadcasts the message to server`\
+`type == 4 :: group 2 broadcasts the message to server`\
+`type == 5 :: any client broadcasts the global message to server`\
 `type == pid :: server sends message to clients`\
 
 
